@@ -120,3 +120,4 @@ D:\Database-backup\obj\Debug\net9.0\ref\DatabaseBackupAPI.dll
 D:\Database-backup\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
 D:\Database-backup\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 D:\Database-backup\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\Database-backup\obj\Debug\net9.0\DatabaseBackupAPI.sourcelink.json

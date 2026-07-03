@@ -22,7 +22,7 @@ public class BackupService
             var processStartInfo = new ProcessStartInfo
             {
                 FileName = pgDumpPath,
-                Arguments = $"\"{connectionString}\" -F c -f \"{outputFilePath}\"",
+                Arguments = $"\"{connectionString}\" -f \"{outputFilePath}\"",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,

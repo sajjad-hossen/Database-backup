@@ -13,6 +13,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<DatabaseBackupAPI.Services.BackupService>();
+builder.Services.AddScoped<DatabaseBackupAPI.Services.FinancialReportService>();
 
 var app = builder.Build();
 

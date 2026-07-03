@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using DatabaseBackupAPI.Services;
 using Microsoft.AspNetCore.Mvc;
-
 using Microsoft.Extensions.Configuration;
+using Hangfire;
 
 namespace DatabaseBackupAPI.Controllers;
 
@@ -14,15 +14,18 @@ public class BackupController : ControllerBase
     private readonly BackupService _backupService;
     private readonly IConfiguration _configuration;
     private readonly FinancialReportService _financialReportService;
+    private readonly IBackgroundJobClient _backgroundJobClient;
 
     public BackupController(
         BackupService backupService,
         IConfiguration configuration,
-        FinancialReportService financialReportService)
+        FinancialReportService financialReportService,
+        IBackgroundJobClient backgroundJobClient)
     {
         _backupService = backupService;
         _configuration = configuration;
         _financialReportService = financialReportService;
+        _backgroundJobClient = backgroundJobClient;
     }
 
     [HttpPost("run-backup")]
@@ -49,16 +52,9 @@ public class BackupController : ControllerBase
             string fileName = $"backup_{timestamp}.sql";
             string outputFilePath = Path.Combine(desktopPath, fileName);
 
-            bool isSuccess = _backupService.CreateLocalBackup(connectionString, outputFilePath);
+            _backgroundJobClient.Enqueue(() => _backupService.CreateLocalBackup(connectionString, outputFilePath));
 
-            if (isSuccess)
-            {
-                return Ok(new { Message = "Backup successful", FilePath = outputFilePath });
-            }
-            else
-            {
-                return BadRequest(new { Message = "Backup failed. Check server logs for details." });
-            }
+            return StatusCode(202, new { Message = "Backup job has been successfully queued in the background.", FilePath = outputFilePath });
         }
         catch (Exception ex)
         {

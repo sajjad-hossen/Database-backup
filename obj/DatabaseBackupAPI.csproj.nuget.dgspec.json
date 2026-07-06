@@ -50,6 +50,10 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "AWSSDK.S3": {
+              "target": "Package",
+              "version": "[3.7.415.5, )"
+            },
             "Hangfire.AspNetCore": {
               "target": "Package",
               "version": "[1.8.23, )"

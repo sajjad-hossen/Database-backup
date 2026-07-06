@@ -16,7 +16,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddControllers();
 builder.Services.AddScoped<DatabaseBackupAPI.Services.BackupService>();
 builder.Services.AddScoped<DatabaseBackupAPI.Services.FinancialReportService>();
-
+builder.Services.AddScoped<DatabaseBackupAPI.Services.IStorageService, DatabaseBackupAPI.Services.S3CompatibleStorageService>();
+builder.Services.AddScoped<DatabaseBackupAPI.Services.BackupWorkflowService>();
 builder.Services.AddHangfire(config => config
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
     .UseSimpleAssemblyNameTypeSerializer()
@@ -58,6 +59,21 @@ app.MapGet("/weatherforecast", () =>
 .WithName("GetWeatherForecast");
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+    var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
+    string dbConnectionString = configuration.GetConnectionString("NeonConnection") ?? "";
+    string discordWebhookUrl = "YOUR_DISCORD_WEBHOOK_URL"; 
+
+    recurringJobManager.AddOrUpdate<BackupWorkflowService>(
+        "automated-daily-backup",
+        workflow => workflow.ExecuteFullBackupAsync(dbConnectionString, "MessMealDb_Daily", discordWebhookUrl),
+        Cron.Daily
+    );
+}
 
 app.Run();
 

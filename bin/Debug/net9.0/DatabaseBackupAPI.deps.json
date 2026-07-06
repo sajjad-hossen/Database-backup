@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v9.0": {
       "DatabaseBackupAPI/1.0.0": {
         "dependencies": {
+          "AWSSDK.S3": "3.7.415.5",
           "Hangfire.AspNetCore": "1.8.23",
           "Hangfire.PostgreSql": "1.21.1",
           "Microsoft.EntityFrameworkCore.Design": "9.0.0",
@@ -16,6 +17,25 @@
         },
         "runtime": {
           "DatabaseBackupAPI.dll": {}
+        }
+      },
+      "AWSSDK.Core/3.7.402.6": {
+        "runtime": {
+          "lib/net8.0/AWSSDK.Core.dll": {
+            "assemblyVersion": "3.3.0.0",
+            "fileVersion": "3.7.402.6"
+          }
+        }
+      },
+      "AWSSDK.S3/3.7.415.5": {
+        "dependencies": {
+          "AWSSDK.Core": "3.7.402.6"
+        },
+        "runtime": {
+          "lib/net8.0/AWSSDK.S3.dll": {
+            "assemblyVersion": "3.3.0.0",
+            "fileVersion": "3.7.415.5"
+          }
         }
       },
       "Dapper/2.0.123": {
@@ -741,6 +761,20 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "AWSSDK.Core/3.7.402.6": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-w/TS/8ATv2I7Gh3roakK7Lj9uMHg/W7s4sSWrgrnvvlhSdFQ3T/x92RB5fPxjtDnLkFe7iirxtuMjbpWypVuMg==",
+      "path": "awssdk.core/3.7.402.6",
+      "hashPath": "awssdk.core.3.7.402.6.nupkg.sha512"
+    },
+    "AWSSDK.S3/3.7.415.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-SMdTKO9rR2AptBh6raXiXqUgd0r8DKXv2na0GSPglYgN0nurkQp7GkqF1R1LDN9RQMm72reOCJrJLN9fNRjLGw==",
+      "path": "awssdk.s3/3.7.415.5",
+      "hashPath": "awssdk.s3.3.7.415.5.nupkg.sha512"
     },
     "Dapper/2.0.123": {
       "type": "package",

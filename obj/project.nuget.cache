@@ -1,9 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "57wUkGDvozw=",
+  "dgSpecHash": "RmN7WUnWSpo=",
   "success": true,
   "projectFilePath": "D:\\Database-backup\\DatabaseBackupAPI.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\ACT\\.nuget\\packages\\awssdk.core\\3.7.402.6\\awssdk.core.3.7.402.6.nupkg.sha512",
+    "C:\\Users\\ACT\\.nuget\\packages\\awssdk.s3\\3.7.415.5\\awssdk.s3.3.7.415.5.nupkg.sha512",
     "C:\\Users\\ACT\\.nuget\\packages\\dapper\\2.0.123\\dapper.2.0.123.nupkg.sha512",
     "C:\\Users\\ACT\\.nuget\\packages\\dapper.aot\\1.0.48\\dapper.aot.1.0.48.nupkg.sha512",
     "C:\\Users\\ACT\\.nuget\\packages\\hangfire.aspnetcore\\1.8.23\\hangfire.aspnetcore.1.8.23.nupkg.sha512",

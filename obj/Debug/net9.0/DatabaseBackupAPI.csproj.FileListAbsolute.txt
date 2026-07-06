@@ -142,3 +142,5 @@ D:\Database-backup\bin\Debug\net9.0\sv\Hangfire.Core.resources.dll
 D:\Database-backup\bin\Debug\net9.0\tr-TR\Hangfire.Core.resources.dll
 D:\Database-backup\bin\Debug\net9.0\zh-TW\Hangfire.Core.resources.dll
 D:\Database-backup\bin\Debug\net9.0\zh\Hangfire.Core.resources.dll
+D:\Database-backup\bin\Debug\net9.0\AWSSDK.Core.dll
+D:\Database-backup\bin\Debug\net9.0\AWSSDK.S3.dll

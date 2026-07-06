@@ -15,17 +15,20 @@ public class BackupController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly FinancialReportService _financialReportService;
     private readonly IBackgroundJobClient _backgroundJobClient;
+    private readonly BackupWorkflowService _backupWorkflowService;
 
     public BackupController(
         BackupService backupService,
         IConfiguration configuration,
         FinancialReportService financialReportService,
-        IBackgroundJobClient backgroundJobClient)
+        IBackgroundJobClient backgroundJobClient,
+        BackupWorkflowService backupWorkflowService)
     {
         _backupService = backupService;
         _configuration = configuration;
         _financialReportService = financialReportService;
         _backgroundJobClient = backgroundJobClient;
+        _backupWorkflowService = backupWorkflowService;
     }
 
     [HttpPost("run-backup")]
@@ -34,7 +37,7 @@ public class BackupController : ControllerBase
         try
         {
             // Use the actual credentials from appsettings.json
-            string dbConnectionString = _configuration.GetConnectionString("DefaultConnection");
+            string dbConnectionString = _configuration.GetConnectionString("NeonConnection");
             
             // Note: pg_dump expects a connection string in URI format or libpq format.
             // A simple conversion from the ADO.NET format:
@@ -47,14 +50,12 @@ public class BackupController : ControllerBase
             
             string connectionString = $"postgresql://{username}:{password}@{host}:{port}/{database}";
 
-            string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            string fileName = $"backup_{timestamp}.sql";
-            string outputFilePath = Path.Combine(desktopPath, fileName);
+            _backgroundJobClient.Enqueue(() => _backupWorkflowService.ExecuteFullBackupAsync(
+                connectionString,
+                "Manual_Backup",
+                "")); // No discord webhook for manual backup, or you can add one later
 
-            _backgroundJobClient.Enqueue(() => _backupService.CreateLocalBackup(connectionString, outputFilePath));
-
-            return StatusCode(202, new { Message = "Backup job has been successfully queued in the background.", FilePath = outputFilePath });
+            return StatusCode(202, new { Message = "Backup job has been successfully queued in the background." });
         }
         catch (Exception ex)
         {

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DatabaseBackupAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1869ce704432baf4522e87d1212ebbbc1131c143")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+119f7046ab2f4bcc7d240027a9861cac647558f8")]
 [assembly: System.Reflection.AssemblyProductAttribute("DatabaseBackupAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DatabaseBackupAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

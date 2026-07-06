@@ -125,6 +125,8 @@ public class FinancialReportService
             decimal mealRate      = totalMealsVal > 0 && messBazTotal > 0
                                     ? Math.Round(messBazTotal / totalMealsVal, 2) : 0;
 
+            var memberSummaryRows = BuildMemberSummaryRows(messUsers, messMeals, messDeposits, mealRate, userMap);
+
             messNavLinks.AppendLine($"<a href=\"#{anchor}\" class=\"nav-link\" style=\"--c:{color}\">{EscapeHtml(messName)}</a>");
 
             messSections.AppendLine($@"
@@ -143,18 +145,21 @@ public class FinancialReportService
       <div class=""mstat""><span class=""mstat-label"">Deposits</span><span class=""mstat-val"">৳{messDepTotal:N2}</span></div>
       <div class=""mstat""><span class=""mstat-label"">Bazar Cost</span><span class=""mstat-val"">৳{messBazTotal:N2}</span></div>
       <div class=""mstat""><span class=""mstat-label"">Meal Rate</span><span class=""mstat-val"">৳{mealRate:N2}</span></div>
-      <div class=""mstat""><span class=""mstat-label"">Balance</span><span class=""mstat-val {(messDepTotal - messBazTotal >= 0 ? "pos" : "neg")}"">৳{(messDepTotal - messBazTotal):N2}</span></div>
+      <div class=""mstat""><span class=""mstat-label"">Balance</span><span class=""mstat-val {(messDepTotal - messBazTotal >= 0 ? "pos" : "neg")}"">{"৳"}{(messDepTotal - messBazTotal):N2}</span></div>
     </div>
   </div>
 
-  {BuildSubTable("👥 Members", color, new[] {"Name","Email","Status","Role","IsCalculationMember"},
-      messUsers, userMap)}
-  {BuildSubTable("🍽️ Meals", color, new[] {"UserId","Date","MealCount"},
-      messMeals, userMap, resolveUserCol:"UserId")}
-  {BuildSubTable("💰 Deposits", color, new[] {"UserId","Amount","Date","Note"},
-      messDeposits, userMap, resolveUserCol:"UserId")}
-  {BuildSubTable("🛒 Bazar Costs", color, new[] {"BuyerUserId","Amount","Date","Description"},
-      messBazar, userMap, resolveUserCol:"BuyerUserId")}
+  " +
+  BuildMemberSummaryTable(memberSummaryRows, color) +
+  BuildSubTable("👥 Members", color, new[] {"Name","Email","Status","Role","IsCalculationMember"},
+      messUsers, userMap) +
+  BuildSubTable("🍽️ Meals", color, new[] {"UserId","Date","MealCount"},
+      messMeals, userMap, resolveUserCol:"UserId") +
+  BuildSubTable("💰 Deposits", color, new[] {"UserId","Amount","Date","Note"},
+      messDeposits, userMap, resolveUserCol:"UserId") +
+  BuildSubTable("🛒 Bazar Costs", color, new[] {"BuyerUserId","Amount","Date","Description"},
+      messBazar, userMap, resolveUserCol:"BuyerUserId") +
+  @"
 </section>");
         }
 
@@ -232,6 +237,13 @@ public class FinancialReportService
     tbody tr:hover td {{ background:rgba(255,255,255,.025); }}
     tbody tr:nth-child(even) td {{ background:rgba(255,255,255,.012); }}
     .empty-row {{ text-align:center; padding:1.5rem !important; color:var(--muted); font-style:italic; }}
+
+    /* MEMBER SUMMARY CARD */
+    .member-summary-card {{ background: var(--surface); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:1rem; overflow:hidden; }}
+    .member-summary-card .sub-card-header {{ background: var(--surface3); }}
+    .net-pos {{ color:#34d399; font-weight:700; }}
+    .net-neg {{ color:#f87171; font-weight:700; }}
+    .net-zero {{ color:var(--muted); }}
 
     /* DIVIDER */
     .mess-divider {{ max-width:1200px; margin:2rem auto; height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); padding:0 2rem; }}
@@ -351,8 +363,79 @@ public class FinancialReportService
         return sb.ToString();
     }
 
+    private record MemberFinancialRow(
+        string Name, decimal TotalMeals, decimal TotalDeposit, decimal CostShare, decimal NetBalance);
+
+    private static List<MemberFinancialRow> BuildMemberSummaryRows(
+        List<Dictionary<string, string>> messUsers,
+        List<Dictionary<string, string>> messMeals,
+        List<Dictionary<string, string>> messDeposits,
+        decimal mealRate,
+        Dictionary<string, string> userMap)
+    {
+        var result = new List<MemberFinancialRow>();
+        foreach (var user in messUsers)
+        {
+            var uid      = GetVal(user, "Id");
+            var name     = GetVal(user, "Name");
+            decimal meals    = messMeals
+                .Where(r => GetVal(r, "UserId") == uid)
+                .Sum(r => decimal.TryParse(GetVal(r, "MealCount"), out var v) ? v : 0);
+            decimal deposit  = messDeposits
+                .Where(r => GetVal(r, "UserId") == uid)
+                .Sum(r => decimal.TryParse(GetVal(r, "Amount"),    out var v) ? v : 0);
+            decimal costShare = Math.Round(meals * mealRate, 2);
+            decimal net       = deposit - costShare;
+            result.Add(new MemberFinancialRow(name, meals, deposit, costShare, net));
+        }
+        return result.OrderBy(r => r.Name).ToList();
+    }
+
+    private static string BuildMemberSummaryTable(List<MemberFinancialRow> rows, string color)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($@"
+<div class=""member-summary-card"" style=""--accent:{color}"">
+  <div class=""sub-card-header"">
+    <h3>📊 Member Financial Summary</h3>
+    <span class=""badge"">{rows.Count} member{(rows.Count != 1 ? "s" : "")}</span>
+  </div>
+  <div class=""table-wrap"">
+    <table>
+      <thead><tr>
+        <th>Member</th>
+        <th>Total Meals</th>
+        <th>Total Deposited</th>
+        <th>Cost Share</th>
+        <th>Net Balance</th>
+      </tr></thead>
+      <tbody>");
+
+        if (rows.Count == 0)
+        {
+            sb.AppendLine("<tr><td colspan=\"5\" class=\"empty-row\">No members</td></tr>");
+        }
+        else
+        {
+            foreach (var r in rows)
+            {
+                var netCls  = r.NetBalance > 0 ? "net-pos" : r.NetBalance < 0 ? "net-neg" : "net-zero";
+                var netSign = r.NetBalance >= 0 ? "+" : "";
+                sb.AppendLine($@"<tr>
+        <td>{EscapeHtml(r.Name)}</td>
+        <td>{r.TotalMeals:N1}</td>
+        <td>৳{r.TotalDeposit:N2}</td>
+        <td>৳{r.CostShare:N2}</td>
+        <td class=""{netCls}"">{netSign}৳{r.NetBalance:N2}</td>
+      </tr>");
+            }
+        }
+        sb.AppendLine("</tbody></table></div></div>");
+        return sb.ToString();
+    }
+
     private static string GetVal(Dictionary<string, string> row, string key) =>
-        row.TryGetValue(key, out var v) ? v : "—";
+        row.TryGetValue(key, out var v) ? v : "\u2014";
 
     private static decimal SumColumn(List<Dictionary<string, string>> rows, string col) =>
         rows.Sum(r => decimal.TryParse(GetVal(r, col), out var v) ? v : 0);

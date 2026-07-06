@@ -22,7 +22,8 @@ public class BackupService
             var processStartInfo = new ProcessStartInfo
             {
                 FileName = pgDumpPath,
-                Arguments = $"\"{connectionString}\" -f \"{outputFilePath}\"",
+                // Add -t flags to export only the tables the user cares about
+                Arguments = $"\"{connectionString}\" -t \"\\\"BazarCosts\\\"\" -t \"\\\"Deposits\\\"\" -t \"\\\"Meals\\\"\" -t \"\\\"Users\\\"\" -t \"\\\"Messes\\\"\" -f \"{outputFilePath}\"",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
